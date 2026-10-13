@@ -8,6 +8,7 @@
 
 :root{
     --col_bg: #fff;
+    --col_bgForm: #e7e7e7;
     --col_txt: #131212;
     --col_spc: rgb(47,84,150);
 }
@@ -41,4 +42,11 @@ td{
 tr {
     padding: 0;
     margin: 0;
+}
+
+form{
+    border: var(--col_txt) 1px solid;
+    padding: 10px;
+    border-radius: 3px;
+    margin-bottom: 1vh;
 }

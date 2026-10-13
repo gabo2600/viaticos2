@@ -8,6 +8,9 @@ let inSerie = document.getElementById("in_pr");
 let inRuta = document.getElementById("in_ruta");
 let inObs = document.getElementById("in_obs");
 
+let btnGenReport = document.getElementById("btnRep");
+let btnCls = document.getElementById("btnClear");
+
 let send = document.getElementById("btnAdd");
 let test = document.getElementById("test");
 
@@ -578,13 +581,19 @@ init = () => {
         inRuta.appendChild(opt);
     }
     //se recuperan los datos del almacenamiento local
-    /*
     const datos = localStorage.getItem("entries");
     if (datos) {
         entries = JSON.parse(datos);
     }
-    */
     updateTable();
+    btnGenReport.onclick = exportarTablaHTML;
+    
+    btnCls.onclick = ()=>{
+        entries = [];
+        localStorage.setItem("entries", JSON.stringify(entries));
+        updateTable();
+    }
 }
+
 
 init();
