@@ -1,0 +1,44 @@
+*{
+    margin: 0;
+    padding: 0;
+    background-color: var(--col_bg);
+    color: var(--col_txt);
+    font-family: Calibri, sans-serif
+}
+
+:root{
+    --col_bg: #fff;
+    --col_txt: #131212;
+    --col_spc: rgb(47,84,150);
+}
+
+
+
+table {
+    border-collapse: collapse; 
+    border-spacing: 0;
+}
+
+th{
+    border-style: solid;
+    border-color: var(--col_txt) ;
+    border-width: 1px;
+    margin: 0;
+    padding: 3px;
+    background-color: var(--col_spc);
+    color: var(--col_txt);
+}
+
+td{
+    border-style: solid;
+    border-color: var(--col_txt) ;
+    border-width: 1px;
+    background-color: var(--col_bg);
+    padding: 3px;
+    margin: 0;
+}
+
+tr {
+    padding: 0;
+    margin: 0;
+}

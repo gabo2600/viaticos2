@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/main.css">
+    <script src="https://cdn.jsdelivr.net/npm/exceljs/dist/exceljs.min.js"></script>
+    <title>Viaticos 2</title>
+</head>
+
+<body>
+    <h1>Viaticos</h1>
+    <table id="entry_table">
+    </table>
+
+    <form>
+        <h3>Info del servicio</h3>
+        <label for="in_date">Fecha de servicio</label><br>
+        <input type="date" name="in_date" id="in_date" placeholder="" required="required"><br><br>
+        <label for="in_ticket">Ticket del servicio</label><br>
+        <input type="text" name="in_ticket" id="in_ticket" placeholder="NA">
+        <br><br>
+        <label for="in_pr">Serie de las impresora</label><br>
+        <input type="text" name="in_pr" id="in_pr" placeholder=""><br>
+        <br>
+        <label>Ruta</label><br>
+        <select name="in_ruta" id="in_ruta">
+        </select>
+
+        <br><br>
+        <label for="in_obs">Observaciones</label><br>
+        <input type="text" name="in_obs" id="in_obs" placeholder="Sin Observaciones">
+        <br><br>
+        <input type="button" value="Agregar" id="btnAdd">
+        <input type="reset" value="Borrar datos">
+    </form>
+
+
+    <div id="test"></div>
+</body>
+<script src="js/app.js">
+</script>
+</html>
