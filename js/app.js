@@ -17,7 +17,6 @@ const send = document.getElementById("btnAdd");
 
 //Toast
 const toast = bootstrap.Toast.getOrCreateInstance(document.getElementById("toast"));
-
 const tab = document.getElementById("entry_table");
 
 
@@ -371,6 +370,105 @@ updateTable = () => {
     tab.appendChild(totalRow);
 }
 
+
+createRow = (Data) => {
+    //Variables
+    //Fila de la tabla a añadir
+    let tableRow =document.createElement("tr");
+    //espacios totales a dejar en rowspans para el campo fecha en la fila
+    let totalRowspansXday = 0;
+    //indices
+    //Indice del Total de filas entre todos los registros
+    let i = 0;
+    //Indice de el registro cuyas rutas(stops) estan siendo dibujadas
+    let j = 0;
+    /*Registra el total de stops ya pintadas...
+        -si de la primera ruta son 4 stops esto deberia ser 4
+        esto para que al dibujar el siguente registro esta bariable se reste de i para que la siguente
+        tanda de stoips se empiece a dibujar desde cero respetando los indices del arreglo stops de cada ruta
+        sin alterar el indice i
+        algo como rutas[Data[j].r].stops[i-k].desc...
+    */
+    let k = 0;
+    //Indice que se usa solo si hay varios tickets en una sola ruta, para dividir la celda de series y tickets y pintarla en multiples pasos del arreglo
+    let l = 1;
+
+    //rutasActuales representa el numero de rutas a dibujar por registro
+    let rutasActuales = 0;
+
+    //se sacan los espacios totales a dejar
+    for (i = 0; i <= Data.length - 1; i++) {
+        totalRowspansXday += rutas[Data[i].r].stops.length;
+    }
+    //fecha con todos los raw spans del dia
+    tableRow.appendChild(createTd(Data[0].d,totalRowspansXday,1));
+
+    //Se dibula el total de filas
+    for (i = 0; i < totalRowspansXday; i++) {
+
+        /*Si la fila actual es mayor al numero de stops del registro actual(menos los ya dibujados de previos registros)
+        se incrementa j para dibujar el siguente registro y k se le suman el numero de registros ya dibujados*/
+        if (i - k >= rutas[Data[j].r].stops.length) {
+            k += rutas[Data[j].r].stops.length;
+            j++;
+        }
+        rutasActuales = rutas[Data[j].r].stops.length;
+
+        //incluye varios tickets
+        //Si cuenta con la funcion trim es uina cadena, sino es un arreglo
+        if (Data[j].t.trim ){
+            console.log("Condumio")
+            if (Data[j].t.includes(",") && Data[j].t.split(",").length < rutasActuales){
+                Data[j].t = Data[j].t.split(",");
+                Data[j].s = Data[j].s.split(",");
+            }
+            console.log(Data[j].s.length);
+            console.log(Data[j].s);
+        }
+
+        //Solo dibuja la primera linea de la ruta con los datos de la impresora, ticket. etc
+        if ((i - k) < l) {           
+            //Ticket & Serie
+            //Si es un arreglo que se pinte todo de usa vez
+            if (!Data[j].t.trim && Data[j].length>l){
+                tableRow.appendChild(createTd(Data[j].t[l],rutasActuales-(Data[j].length-l),1));
+                tableRow.appendChild(createTd(Data[j].s[l],rutasActuales-(Data[j].length-l),1));
+                l++;
+            }else{
+                tableRow.appendChild(createTd(Data[j].t,  rutasActuales,  1));
+                tableRow.appendChild(createTd(Data[j].s,  rutasActuales  ,1));
+            }
+        }
+        //descripcion de ruta
+        tableRow.appendChild(createTd(rutas[Data[j].r].stops[i - k].desc,1,4));
+        //Si el numero de fila es menor al numero de registro actual o igual se dibuja
+        if ((i - k) < 1) {
+            //observaciones
+            tableRow.appendChild(createTd(Data[j].o,rutasActuales,1));
+        }
+        //importe total
+        tableRow.appendChild(createTd("$"+rutas[Data[j].r].stops[i - k].price+".00",1,1));
+        total += rutas[Data[j].r].stops[i - k].price;
+
+        //Se añade la fila a la tabla
+        tab.appendChild(tableRow);
+        //Se crea una nueva columna tras meter la anterior
+        tableRow = document.createElement("tr");
+    }
+}
+
+createTd = (txt,rowspan,colspan) => {
+    let td = document.createElement("td");
+    //Si el atributo es mayor a 1 se añade
+    if (rowspan>1)
+        td.setAttribute("rowspan", rowspan);
+    if (colspan>1)
+        td.setAttribute("colspan", colspan);
+    td.innerText = txt;
+    td.onclick = ()=>editHTMLCell(td);
+    return td;
+}
+
 exportarTablaHTML = async () => {
     try {
         // 1. Cargar la plantilla original
@@ -492,6 +590,15 @@ exportarTablaHTML = async () => {
                     size: 11,
                     color: { argb: "000" }
                 };
+                //Si es un numero que se remplace el texto por un numero tipo moneda en la tabla
+                if (celdaExcel.value.includes("$")){
+
+                    celdaExcel.value = parseFloat(celdaExcel.value.replace("$",""));
+                    celdaExcel.numFmt = "$0.00";
+                    //Si es la celda del total, se mete formula sumatoria
+                    if (esFilaTotales)
+                        celdaExcel.value = {formula:"SUM(I11:I"+(9+filasHTML.length)+")"};                        
+                }
 
                 if (esFilaTotales) { //Si es la de totales que se pinte de
                     celdaExcel.fill = {
@@ -530,12 +637,11 @@ exportarTablaHTML = async () => {
         const blob = new Blob([buffer], {
             type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         });
-
         const url = URL.createObjectURL(blob);
         const enlace = document.createElement("a");
 
         enlace.href = url;
-        enlace.download = "reporte_viaticos.xlsx";
+        enlace.download = "Solicitud de viaticos Gabriel Velez "+curDate+".xlsx";
         enlace.click();
 
         setTimeout(() => URL.revokeObjectURL(url), 1000);
@@ -546,81 +652,6 @@ exportarTablaHTML = async () => {
     }
 }
 
-createRow = (Data) => {
-    //Variables
-    //Fila de la tabla a añadir
-    let tableRow =document.createElement("tr");
-    //espacios totales a dejar en rowspans para el campo fecha en la fila
-    let totalRowspansXday = 0;
-    //indices
-    //Indice del Total de filas entre todos los registros
-    let i = 0;
-    //Indice de el registro cuyas rutas(stops) estan siendo dibujadas
-    let j = 0;
-    /*Registra el total de stops ya pintadas...
-        -si de la primera ruta son 4 stops esto deberia ser 4
-        esto para que al dibujar el siguente registro esta bariable se reste de i para que la siguente
-        tanda de stoips se empiece a dibujar desde cero respetando los indices del arreglo stops de cada ruta
-        sin alterar el indice i
-        algo como rutas[Data[j].r].stops[i-k].desc...
-    */
-    let k = 0;
-    //rutasActuales representa el numero de rutas a dibujar por registro
-    let rutasActuales = 0;
-
-    //se sacan los espacios totales a dejar
-    for (i = 0; i <= Data.length - 1; i++) {
-        totalRowspansXday += rutas[Data[i].r].stops.length;
-    }
-    //fecha con todos los raw spans del dia
-    tableRow.appendChild(createTd(Data[0].d,totalRowspansXday,1));
-
-    //Se dibula el total de filas
-    for (i = 0; i < totalRowspansXday; i++) {
-
-        
-        /*Si la fila actual es mayor al numero de stops del registro actual(menos los ya dibujados de previos registros)
-        se incrementa j para dibujar el siguente registro y k se le suman el numero de registros ya dibujados*/
-        if (i - k >= rutas[Data[j].r].stops.length) {
-            k += rutas[Data[j].r].stops.length;
-            j++;
-        }
-        rutasActuales = rutas[Data[j].r].stops.length;
-        //Solo dibuja la primera linea de la ruta con los datos de la impresora, ticket. etc
-        if ((i - k) < 1) {           
-            //Ticket & Serie
-            tableRow.appendChild(createTd(Data[j].t,  rutasActuales,  1));
-            tableRow.appendChild(createTd(Data[j].s,  rutasActuales  ,1));
-        }
-        //descripcion de ruta
-        tableRow.appendChild(createTd(rutas[Data[j].r].stops[i - k].desc,1,4));
-        //Si el numero de fila es menor al numero de registro actual o igual se dibuja
-        if ((i - k) < 1) {
-            //observaciones
-            tableRow.appendChild(createTd(Data[j].o,rutasActuales,1));
-        }
-        //importe total
-        tableRow.appendChild(createTd("$"+rutas[Data[j].r].stops[i - k].price+".00",1,1));
-        total += rutas[Data[j].r].stops[i - k].price;
-
-        //Se añade la fila a la tabla
-        tab.appendChild(tableRow);
-        //Se crea una nueva columna tras meter la anterior
-        tableRow = document.createElement("tr");
-    }
-}
-
-createTd = (txt,rowspan,colspan) => {
-    let td = document.createElement("td");
-    //Si el atributo es mayor a 1 se añade
-    if (rowspan>1)
-        td.setAttribute("rowspan", rowspan);
-    if (colspan>1)
-        td.setAttribute("colspan", colspan);
-    td.innerText = txt;
-    td.onclick = ()=>editHTMLCell(td);
-    return td;
-}
 
 //send
 send.addEventListener("click", () => {
@@ -654,6 +685,7 @@ init = async() => {
         entries = JSON.parse(datos);
     }
     await loadparam();
+
     updateTable();
     
     const fecha = new Date();
@@ -706,6 +738,9 @@ loadparam = async()=>{
     .pipeThrough(new DecompressionStream("deflate"));
     let jsonEntries =  await new Response(stream).text();
     entries = JSON.parse(jsonEntries);
+    
+    localStorage.setItem("entries", JSON.stringify(entries));
+    window.location.replace(location.origin + location.pathname)
 }
 
 genUrl = async()=>{

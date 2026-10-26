@@ -70,13 +70,26 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
         <button type="button" class="btn btn-primary" id="btnClear">Si, Borrar</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
       </div>
     </div>
   </div>
 </div>
 
+<div class="modal fade" id="Modal2" tabindex="-2" aria-labelledby="ModalLabel2" aria-hidden="false">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="ModalLabel2">Esta seguro de borrar los registros de la tabla</h5>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" id="btnSave">Guardar</button>
+        <button type="button" class="btn-close" data-bs-dismiss="Modal2" aria-label="Close"></button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
   <div id="toast" class="toast hide" role="alert" aria-live="assertive" aria-atomic="true">
